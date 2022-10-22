@@ -23,7 +23,7 @@ public class TranslationController {
     String inputToTranslate = input.getInput();
     String language = input.getLanguage();
 //    RequestContext.set(input);
-    log.info("Language = " + language);
+    log.info("Translation request " + input);
     return translator.translate(inputToTranslate);
   }
 
