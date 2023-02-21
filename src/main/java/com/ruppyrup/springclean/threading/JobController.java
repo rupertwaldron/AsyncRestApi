@@ -36,7 +36,7 @@ public class JobController {
   @PostMapping("/async")
   public String startJobAsync(@RequestBody JobRequest request) {
     System.out.println("Working with thread -> " + Thread.currentThread().getName());
-//    if (jobLaucher.getExecutorById(request.jobId()) != null) return ResponseEntity.status(PROCESSING).body("Already Processing");
+    if (jobLaucher.getExecutorById(request.jobId()) != null) return "Already Processing";
     jobLaucher.runAsync(request.jobId(), () -> longRunningJob(request));
     return "Job started for id :: " + request.jobId();
   }

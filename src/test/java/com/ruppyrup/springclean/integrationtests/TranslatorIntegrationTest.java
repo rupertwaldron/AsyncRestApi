@@ -22,8 +22,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 
-//@Import(IntegrationTestConfig.class)
-//@ExtendWith(LoggingExtension.class)
+@Import(IntegrationTestConfig.class)
+@ExtendWith(LoggingExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class TranslatorIntegrationTest {
 
@@ -69,7 +69,7 @@ class TranslatorIntegrationTest {
         response = getStringResponseForAsyncJobRequest(jobId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).contains("Job started for id :: " + jobId);
+        assertThat(response.getBody()).contains("Already Processing");
 
         ResponseEntity<String> jobStatus = getJobStatus(jobId);
         System.out.println(jobStatus.getBody());
