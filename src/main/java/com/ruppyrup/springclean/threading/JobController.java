@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -19,31 +20,31 @@ import static org.springframework.http.HttpStatus.*;
 @RequestMapping("/threadjobs")
 public class JobController {
 
+  private static Random random = new Random();
+
   private final JobLaucher jobLaucher;
 
   public JobController(JobLaucher jobLaucher) {
     this.jobLaucher = jobLaucher;
-    ExecutorService executorService = Executors.newFixedThreadPool(1);
-    this.jobLaucher.setExecutorService(executorService);
   }
 
 
   @GetMapping("/{id}")
   public String getJobStatus(@PathVariable int id) {
-    return jobLaucher.getExecutorById(id).getStatus();
+    return jobLaucher.getExecutorById(id).map(JobLaucher.JobExecutor::getStatus).orElse("Job with id: " + id + " not found");
   }
 
   @PostMapping("/async")
   public String startJobAsync(@RequestBody JobRequest request) {
-    System.out.println("Working with thread -> " + Thread.currentThread().getName());
-    if (jobLaucher.getExecutorById(request.jobId()) != null) return "Already Processing job with id: " + request.jobId();
+    if (jobLaucher.getExecutorById(request.jobId()).isPresent())
+      return "Already Processing job with id: " + request.jobId();
+
     jobLaucher.runAsync(request.jobId(), () -> longRunningJob(request));
     return "Job started for id :: " + request.jobId();
   }
 
   @PostMapping("/sync")
   public String startJobSync(@RequestBody JobRequest request) {
-    System.out.println("Working with thread -> " + Thread.currentThread().getName());
     jobLaucher.runAsync(request.jobId(), () -> longRunningJob(request));
     return "Job started for id :: " + request;
   }
@@ -60,7 +61,7 @@ public class JobController {
 
   private static void safeSleep() {
     try {
-      Thread.sleep(1000);
+      Thread.sleep(random.nextInt(1000));
     } catch (InterruptedException e) {
       throw new RuntimeException(e);
     }

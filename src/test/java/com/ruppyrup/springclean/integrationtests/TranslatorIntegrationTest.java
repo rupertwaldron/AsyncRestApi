@@ -22,8 +22,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 
-@Import(IntegrationTestConfig.class)
-@ExtendWith(LoggingExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class TranslatorIntegrationTest {
 
@@ -59,7 +57,41 @@ class TranslatorIntegrationTest {
     }
 
     @Test
-    void submitMultipleAsyncJobs() {
+    void getStatusNotFoundIfIdNotPresent() {
+        int jobId = 1;
+
+        await().atMost(Duration.ofSeconds(20))
+                .with()
+                .pollInterval(Duration.ofSeconds(2))
+                .until(() -> getJobStatus(jobId).getBody(), equalTo("Job with id: 1 not found"));
+    }
+
+    @Test
+    void submitMultipleAsyncJobsWithDifferentJobIds() {
+        int jobId1 = 1;
+        int jobId2 = 2;
+        ResponseEntity<String> response1 = getStringResponseForAsyncJobRequest(jobId1);
+        ResponseEntity<String> response2 = getStringResponseForAsyncJobRequest(jobId2);
+
+        assertThat(response1.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response1.getBody()).contains("Job started for id :: " + jobId1);
+        assertThat(response2.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response2.getBody()).contains("Job started for id :: " + jobId2);
+
+
+        await().atMost(Duration.ofSeconds(20))
+                .with()
+                .pollInterval(Duration.ofSeconds(2))
+                .until(() -> getJobStatus(jobId1).getBody(), equalTo("Job with id: 1 finished with result = 10"));
+
+        await().atMost(Duration.ofSeconds(20))
+                .with()
+                .pollInterval(Duration.ofSeconds(2))
+                .until(() -> getJobStatus(jobId2).getBody(), equalTo("Job with id: 2 finished with result = 10"));
+    }
+
+    @Test
+    void submitMultipleAsyncJobsWithTheSameJobId() {
         int jobId = 1;
         ResponseEntity<String> response = getStringResponseForAsyncJobRequest(jobId);
 
