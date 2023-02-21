@@ -1,21 +1,22 @@
 package com.ruppyrup.springclean.threading;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Supplier;
 
 public class JobLaucher {
 
   private Map<Integer, JobExecutor> jobExecutors = new ConcurrentHashMap<>();
 
   private ExecutorService executorService;
-  private CompletableFuture<Void> voidCompletableFuture;
 
-  public JobExecutor run(int id, Runnable runnable) {
+  public JobExecutor runAsync(int id, Runnable runnable) {
     JobExecutor jobExecutor = new JobExecutor(id, runnable, executorService);
-    jobExecutors.put(id, jobExecutor);
-    jobExecutor.run();
+    jobExecutors.putIfAbsent(id, jobExecutor);
+    jobExecutor.runAsync();
     return jobExecutor;
   }
 
@@ -40,7 +41,7 @@ public class JobLaucher {
       this.executorService = executorService;
     }
 
-    public void run() {
+    public void runAsync() {
       status = "Started";
       cf1 = CompletableFuture.runAsync(runnable, executorService);
     }
