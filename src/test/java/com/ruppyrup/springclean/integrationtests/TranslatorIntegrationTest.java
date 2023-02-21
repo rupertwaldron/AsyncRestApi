@@ -55,7 +55,7 @@ class TranslatorIntegrationTest {
         await().atMost(Duration.ofSeconds(20))
                 .with()
                 .pollInterval(Duration.ofSeconds(2))
-                .until(() -> getJobStatus(jobId).getBody(), equalTo("Finished"));
+                .until(() -> getJobStatus(jobId).getBody(), equalTo("Job with id: 1 finished with result = 10"));
     }
 
     @Test
@@ -69,7 +69,7 @@ class TranslatorIntegrationTest {
         response = getStringResponseForAsyncJobRequest(jobId);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).contains("Already Processing");
+        assertThat(response.getBody()).contains("Already Processing job with id: 1");
 
         ResponseEntity<String> jobStatus = getJobStatus(jobId);
         System.out.println(jobStatus.getBody());
@@ -77,7 +77,7 @@ class TranslatorIntegrationTest {
         await().atMost(Duration.ofSeconds(20))
                 .with()
                 .pollInterval(Duration.ofSeconds(2))
-                .until(() -> getJobStatus(jobId).getBody(), equalTo("Finished"));
+                .until(() -> getJobStatus(jobId).getBody(), equalTo("Job with id: 1 finished with result = 10"));
     }
 
 

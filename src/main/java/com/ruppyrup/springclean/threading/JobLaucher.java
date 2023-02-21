@@ -4,9 +4,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
+import java.util.function.Supplier;
 
 public class JobLaucher {
 
@@ -15,8 +14,8 @@ public class JobLaucher {
     private ExecutorService executorService;
 
     @Async
-    public void runAsync(int id, Runnable runnable) {
-        JobExecutor jobExecutor = new JobExecutor(id, runnable, executorService);
+    public void runAsync(int id, Supplier<Integer> supplier) {
+        JobExecutor jobExecutor = new JobExecutor(id, supplier, executorService);
         jobExecutors.putIfAbsent(id, jobExecutor);
         jobExecutor.runAsync();
     }
@@ -36,21 +35,22 @@ public class JobLaucher {
     public static class JobExecutor {
         private int id;
         private String status;
-        private Runnable runnable;
-        private Future<String> cf1;
+        private Supplier<Integer> supplier;
+        private Future<Integer> cf1;
         private ExecutorService executorService;
 
-        public JobExecutor(final int id, final Runnable runnable, ExecutorService executorService) {
+
+        public JobExecutor(final int id, final Supplier<Integer> supplier, ExecutorService executorService) {
             this.id = id;
-            this.runnable = runnable;
+            this.supplier = supplier;
             this.executorService = executorService;
         }
 
         //    @Async
         public void runAsync() {
             status = "Started";
-            runnable.run();
-            cf1 = new AsyncResult<String>("Finished");
+            Integer result = supplier.get();
+            cf1 = new AsyncResult<>(result);
             //        cf1 = CompletableFuture.runAsync(runnable, executorService);
         }
 
@@ -61,14 +61,24 @@ public class JobLaucher {
         public String getStatus() {
             if (cf1 != null) {
                 if (cf1.isDone()) {
+                    Integer result;
                     //                cf1.join();
                     System.out.println("Status is finished :: " + Thread.currentThread().getName());
-                    status = "Finished";
+                    try {
+                        result = cf1.get(10, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    } catch (ExecutionException e) {
+                        throw new RuntimeException(e);
+                    } catch (TimeoutException e) {
+                        throw new RuntimeException(e);
+                    }
+                    status = "Job with id: " + id + " finished with result = " + result;
                     jobExecutors.remove(id);
 
                 } else {
                     System.out.println("Status is running :: " + Thread.currentThread().getName());
-                    status = "Running";
+                    status = "Job with id " + id + " is still running";
                 }
             }
 
