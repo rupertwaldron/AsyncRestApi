@@ -19,28 +19,29 @@ public class JobController {
     this.jobLaucher = jobLaucher;
   }
 
-
   @GetMapping("/{id}")
   public String getJobStatus(@PathVariable int id) {
-    return jobLaucher.getExecutorById(id).map(JobLaucher.JobExecutor::getStatus).orElse("Job with id: " + id + " not found");
+    return jobLaucher.getExecutorById(id).map(JobLaucher.JobExecutor::getStatus)
+            .orElse("Job with id: " + id + " not found");
   }
 
   @PostMapping("/async")
   public String startJobAsync(@RequestBody JobRequest request) {
-    if (jobLaucher.getExecutorById(request.jobId()).isPresent())
-      return "Already Processing job with id: " + request.jobId();
+    int id = request.jobId();
 
-    jobLaucher.runAsync(request.jobId(), () -> jobService.longRunningJob(request));
-    return "Job started for id :: " + request.jobId();
+    if (jobLaucher.getExecutorById(id).isPresent())
+      return alreadyProcessingMessage(id);
+
+    jobLaucher.runAsync(id, () -> jobService.longRunningJob(request));
+    return jobStartedMessage(id);
   }
 
-  @PostMapping("/sync")
-  public String startJobSync(@RequestBody JobRequest request) {
-    if (jobLaucher.getExecutorById(request.jobId()).isPresent())
-      return "Already Processing job with id: " + request.jobId();
+  private static String jobStartedMessage(int id) {
+    return "Job started for id :: " + id;
+  }
 
-    jobLaucher.runSync(request.jobId(), () -> jobService.longRunningJob(request));
-    return "Job started for id :: " + request.jobId();
+  private static String alreadyProcessingMessage(int id) {
+    return "Already Processing job with id: " + id;
   }
 
 }

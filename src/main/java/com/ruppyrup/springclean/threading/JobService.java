@@ -1,9 +1,11 @@
 package com.ruppyrup.springclean.threading;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
 
+@Slf4j
 @Service
 public class JobService {
 
@@ -14,7 +16,7 @@ public class JobService {
         for (int i = 0; i < 10; i++) {
             safeSleep();
             sum++;
-            System.out.println("Hello from job id :: " + request.jobId() +
+            log.info("Hello from job id :: " + request.jobId() +
                     " on thread :: " + Thread.currentThread().getName() +
                     " current result = " + sum);
         }
@@ -25,7 +27,8 @@ public class JobService {
         try {
             Thread.sleep(random.nextInt(1000));
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            log.error("Sleep interrupted");
+            Thread.currentThread().interrupt();
         }
     }
 }
