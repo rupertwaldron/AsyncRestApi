@@ -34,6 +34,4 @@ public class JobConfig implements AsyncConfigurer {
   public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
     return new JobAsyncUncaughtExceptionHandler();
   }
-
-
 }

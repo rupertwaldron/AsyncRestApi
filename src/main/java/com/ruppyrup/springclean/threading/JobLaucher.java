@@ -16,21 +16,24 @@ public class JobLaucher {
     public void runAsync(int id, Supplier<Integer> supplier) {
         JobExecutor jobExecutor = new JobExecutor(id, supplier);
         jobExecutors.putIfAbsent(id, jobExecutor);
-        jobExecutor.runAsync();
+        jobExecutor.run();
+    }
+
+
+    public void runSync(int id, Supplier<Integer> supplier) {
+        JobExecutor jobExecutor = new JobExecutor(id, supplier);
+        jobExecutors.putIfAbsent(id, jobExecutor);
+        jobExecutor.run();
     }
 
     public Optional<JobExecutor> getExecutorById(int id) {
         return Optional.ofNullable(jobExecutors.get(id));
     }
 
-    public void removeExecutor(int id) {
-        jobExecutors.remove(id);
-    }
-
     public static class JobExecutor {
-        private int id;
+        private final int id;
         private String status;
-        private Supplier<Integer> supplier;
+        private final Supplier<Integer> supplier;
         private Future<Integer> cf1;
 
 
@@ -39,29 +42,17 @@ public class JobLaucher {
             this.supplier = supplier;
         }
 
-        public void runAsync() {
+        public void run() {
             status = "Started";
             Integer result = supplier.get();
             cf1 = new AsyncResult<>(result);
         }
 
-        public int getId() {
-            return id;
-        }
-
         public String getStatus() {
-            if (cf1 != null) {
-                if (cf1.isDone()) {
-                    Integer result;
-                    System.out.println("Status is finished :: " + Thread.currentThread().getName());
-                    result = safeGetFuture();
-                    status = "Job with id: " + id + " finished with result = " + result;
-                    jobExecutors.remove(id);
-
-                } else {
-                    System.out.println("Status is running :: " + Thread.currentThread().getName());
-                    status = "Job with id " + id + " is still running";
-                }
+            if (cf1 != null && cf1.isDone()) {
+                System.out.println("Status is finished :: " + Thread.currentThread().getName());
+                status = "Job with id: " + id + " finished with result = " + safeGetFuture();
+                jobExecutors.remove(id);
             }
 
             return status;

@@ -112,8 +112,6 @@ class TranslatorIntegrationTest {
                 .until(() -> getJobStatus(jobId).getBody(), equalTo("Job with id: 1 finished with result = 10"));
     }
 
-
-
     private ResponseEntity<String> getStringResponseForAsyncJobRequest(int jobId) {
         JobRequest jobRequest = new JobRequest(jobId);
         HttpEntity<JobRequest> entity = new HttpEntity<>(jobRequest, headers);
@@ -140,61 +138,4 @@ class TranslatorIntegrationTest {
         final ResponseEntity<String> response = restTemplate.getForEntity(uriComponents.toUriString(), String.class);
         return response;
     }
-
-//    @Test
-//    void translateInputToFrench() {
-//        TranslationRequest body = new TranslationRequest();
-//        body.setInput("Text to translate");
-//        body.setLanguage("french");
-//
-//        HttpEntity<TranslationRequest> entity = new HttpEntity<>(body, headers);
-//        UriComponents uriComponents = UriComponentsBuilder.newInstance()
-//                .scheme("http")
-//                .host("localhost")
-//                .port(port)
-//                .path("translate")
-//                .build();
-//
-//        final ResponseEntity<String> response = restTemplate.postForEntity(uriComponents.toUriString(), entity, String.class);
-//        assertThat(response.getStatusCode(), is(HttpStatus.OK));
-//        assertThat(response.getBody(), containsString("French translating Text to translate"));
-//    }
-//
-//  @Test
-//  void translateInputToSpanish() {
-//    TranslationRequest body = new TranslationRequest();
-//    body.setInput("Text to translate");
-//    body.setLanguage("spanish");
-//
-//    HttpEntity<TranslationRequest> entity = new HttpEntity<>(body, headers);
-//    UriComponents uriComponents = UriComponentsBuilder.newInstance()
-//                                      .scheme("http")
-//                                      .host("localhost")
-//                                      .port(port)
-//                                      .path("translate")
-//                                      .build();
-//
-//    final ResponseEntity<String> response = restTemplate.postForEntity(uriComponents.toUriString(), entity, String.class);
-//    assertThat(response.getStatusCode(), is(HttpStatus.OK));
-//    assertThat(response.getBody(), containsString("Spanish translating Text to translate"));
-//  }
-//
-//  @Test
-//  void errorWhenTranslatingInvalidLanguage() {
-//    TranslationRequest body = new TranslationRequest();
-//    body.setInput("Text to translate");
-//    body.setLanguage("german");
-//
-//    HttpEntity<TranslationRequest> entity = new HttpEntity<>(body, headers);
-//    UriComponents uriComponents = UriComponentsBuilder.newInstance()
-//                                      .scheme("http")
-//                                      .host("localhost")
-//                                      .port(port)
-//                                      .path("translate")
-//                                      .build();
-//
-//    final ResponseEntity<String> response = restTemplate.postForEntity(uriComponents.toUriString(), entity, String.class);
-//    assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
-//    assertThat(response.getBody(), containsString("Invalid language :: german"));
-//  }
 }
