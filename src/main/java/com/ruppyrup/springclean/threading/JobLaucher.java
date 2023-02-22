@@ -3,6 +3,7 @@ package com.ruppyrup.springclean.threading;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Optional;
@@ -10,6 +11,7 @@ import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 @Slf4j
+@Component
 public class JobLaucher {
     private static final Map<Integer, JobExecutor> jobExecutors = new ConcurrentHashMap<>();
 

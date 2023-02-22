@@ -14,11 +14,6 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class JobConfig implements AsyncConfigurer {
 
-  @Bean
-  public JobLaucher jobLaucher() {
-    return new JobLaucher();
-  }
-
   @Override
   public Executor getAsyncExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
