@@ -33,12 +33,12 @@ public class JobLaucher {
         private Future<Integer> cf1;
 
 
-        public JobExecutor(final int id, final Supplier<Integer> supplier) {
+        private JobExecutor(final int id, final Supplier<Integer> supplier) {
             this.id = id;
             this.supplier = supplier;
         }
 
-        public void run() {
+        private void run() {
             status = "Started";
             Integer result = supplier.get();
             cf1 = new AsyncResult<>(result);
